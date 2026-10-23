@@ -1,0 +1,47 @@
+#!/bin/python3
+"""
+    main.py
+    main file of the project
+"""
+
+import sys
+from source.common.constants import (
+    ERROR,
+    NOERROR, 
+    HELP_TEXT,
+    ACCEPTED_ARGS,
+)
+
+
+def main():
+    args = sys.argv
+    largs_length = len(args)
+
+    if (largs_length == 2 and args[1] == "--help"):
+        print(HELP_TEXT)
+        sys.exit(NOERROR)
+    elif largs_length < 4:
+        print("Too few arguments", file=sys.stderr)
+    elif largs_length > 5:
+        print("Too many arguments", file=sys.stderr)
+        sys.exit(ERROR)
+
+    flag = args[1]
+    if largs_length == 4 and flag in ACCEPTED_ARGS[:1]:
+        return
+    elif largs_length == 5 and flag in ACCEPTED_ARGS[1:]:
+        return
+    else:
+        print("Wrong flag.", file=sys.stderr)
+        sys.exit(ERROR)
+
+    sys.exit(ERROR)
+
+    
+    
+if __name__ == "__main__":
+    try:
+        main()
+    except (ValueError, IndexError, ZeroDivisionError) as err:
+        print(f"{err}", file=sys.stderr)
+        sys.exit(ERROR)
