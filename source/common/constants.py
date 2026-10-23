@@ -3,7 +3,11 @@
     ...
 """
 
-ACCEPTED_ARGS = ["--predict", "--train", "--save"]
+MAIN_ACCEPTED_FLAGS = ["--predict", "--train", "--help"]
+
+VALID_LABELS = {"Nothing", "Check", "Checkmate", "Stalemate",
+                "Check White", "Check Black",
+                "Checkmate White", "Checkmate Black"}
 
 ERROR = 84
 NOERROR = 0

@@ -7,41 +7,44 @@
 import sys
 from source.common.constants import (
     ERROR,
-    NOERROR, 
+    NOERROR,
     HELP_TEXT,
-    ACCEPTED_ARGS,
+    MAIN_ACCEPTED_FLAGS,
+)
+from source.common.utils import (
+    is_help_flag,
+    is_predict_flag,
+    is_train_flag,
 )
 
 
 def main():
     args = sys.argv
-    largs_length = len(args)
-
-    if (largs_length == 2 and args[1] == "--help"):
+    n_arg = len(args)
+    if n_arg < 2:
+        print("Missing arguments, try --help", file=sys.stderr)
+        sys.exit(ERROR)
+    main_flag = args[1]
+    if is_help_flag(main_flag, n_arg):
         print(HELP_TEXT)
         sys.exit(NOERROR)
-    elif largs_length < 4:
-        print("Too few arguments", file=sys.stderr)
-    elif largs_length > 5:
-        print("Too many arguments", file=sys.stderr)
-        sys.exit(ERROR)
-
-    flag = args[1]
-    if largs_length == 4 and flag in ACCEPTED_ARGS[:1]:
-        return
-    elif largs_length == 5 and flag in ACCEPTED_ARGS[1:]:
-        return
+    files_path = args[2:]
+    if is_predict_flag(main_flag, n_arg, files_path):
+        print(HELP_TEXT)
+        sys.exit(NOERROR)
+    elif is_train_flag(main_flag, n_arg, files_path):
+        print(HELP_TEXT)
+        sys.exit(NOERROR)
     else:
-        print("Wrong flag.", file=sys.stderr)
+        print("An unknow argument was given",  file=sys.stderr)
         sys.exit(ERROR)
 
-    sys.exit(ERROR)
 
-    
-    
 if __name__ == "__main__":
     try:
         main()
-    except (ValueError, IndexError, ZeroDivisionError) as err:
+    except KeyboardInterrupt:
+        sys.exit(ERROR)
+    except Exception as err:
         print(f"{err}", file=sys.stderr)
         sys.exit(ERROR)
