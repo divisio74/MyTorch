@@ -1,4 +1,10 @@
+"""
+    layers.py
+    ...
+"""
+
 import numpy as np
+from source.common.constants import WDC
 
 class Layer:
 
@@ -21,7 +27,7 @@ class Dense(Layer):
             wdc = np.sqrt(2 / n_input)
         else :
             raise ValueError("No init normalisation parameter !")
-        self.params["w"] = wdc * np.random.randn(n_input, n_output)
+        self.params["w"] = WDC * np.random.randn(n_input, n_output)
         self.params["b"] = np.zeros(n_output)
         self.grads["w"] = np.zeros_like(self.params["w"])
         self.grads["b"] = np.zeros_like(self.params["b"])

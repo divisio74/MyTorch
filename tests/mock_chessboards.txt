@@ -1,0 +1,8 @@
+8/8/8/8/8/8/4k3/7K w - - 0 1 Nothing
+4k3/8/8/8/8/5N2/8/4K3 b - - 0 1 Check
+7k/6Q1/5K2/8/8/8/8/8 b - - 0 1 Checkmate
+7k/8/6Q1/5K2/8/8/8/8 b - - 0 1 Stalemate
+4r1k1/8/8/8/8/8/8/4K3 w - - 0 1 Check White
+4k3/8/8/8/8/8/8/4R1K1 b - - 0 1 Check Black
+8/8/8/8/8/5k2/6q1/7K w - - 0 1 Checkmate White
+7k/6Q1/5K2/8/8/8/8/8 b - - 0 1 Checkmate Black

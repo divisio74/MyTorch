@@ -5,10 +5,6 @@
 
 MAIN_ACCEPTED_FLAGS = ["--predict", "--train", "--help"]
 
-VALID_LABELS = {"Nothing", "Check", "Checkmate", "Stalemate",
-                "Check White", "Check Black",
-                "Checkmate White", "Checkmate Black"}
-
 ERROR = 84
 NOERROR = 0
 
@@ -28,3 +24,22 @@ DESCRIPTION
         LOADFILE    File containing an artificial neural network
         CHESSFILE   File containing chessboards
 """
+
+WDC = 0.01
+
+VALID_LABELS = {"Nothing", "Check", "Checkmate", "Stalemate",
+                "Check White", "Check Black",
+                "Checkmate White", "Checkmate Black"}
+
+LABELS = {"nothing": "Nothing", "check": "Check",
+          "checkmate": "Checkmate",
+          "stalemate": "Stalemate",
+          "check white": "Check White", "check black": "Check Black",
+          "checkmate white": "Checkmate White",
+          "checkmate black": "Checkmate Black"}
+
+PIECES = "pnbrqkPNBRQK"
+INT_STRING = "12345678"
+
+TRAINING_EPOCHS = 100
+LEARNING_RATE = 0.01

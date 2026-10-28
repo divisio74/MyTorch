@@ -1,97 +1,76 @@
 """
     utils.py
-
+    ...
 """
 
-from source.common.constants import MAIN_ACCEPTED_FLAGS, ERROR, VALID_LABELS
+
+import csv
+from datetime import date
 import sys
-import os.path
+import math
+import matplotlib
+from pathlib import Path
+import matplotlib.pyplot as plt
+from source.common.constants import ERROR
 
-def is_help_flag(arg : str, n_arg : int) -> bool:
-    if arg == MAIN_ACCEPTED_FLAGS[2] and n_arg == 2:
-        return True
-    return False
 
-def data_files_exist(files_path : tuple[str, str]) -> bool:
-    loadfile = os.path.isfile(files_path[0])
-    chessfile = os.path.isfile(files_path[1])
-    if (loadfile and chessfile):
-        return True
-    return False
+matplotlib.use("Agg")
 
-def get_data_files(files_path : list[str]) -> tuple[str, str]:
-    if len(files_path) == 4:
-        return (files_path[2], files_path[3])
-    return (files_path[0], files_path[1])
 
-def check_network_file(path : str) -> None:
-    if os.path.getsize(path) == 0:
-        raise ValueError(f"{path}: the neural network file is empty")
+def validated_losses(loss_history : list[float]) -> list[float]:
+    losses = [float(loss) for loss in loss_history]
 
-def check_fen(fen : list[str]) -> None:
-    if len(fen) != 6:
-        raise ValueError("a FEN needs 6 fields")
-    ranks = fen[0].split("/")
-    if len(ranks) != 8:
-        raise ValueError("a FEN needs 8 ranks")
-    for rank in ranks:
-        if any(c not in "12345678pnbrqkPNBRQK" for c in rank):
-            raise ValueError(f"invalid character in rank '{rank}'")
-        if sum(int(c) if c.isdigit() else 1 for c in rank) != 8:
-            raise ValueError(f"rank '{rank}' is not 8 squares wide")
-    if fen[0].count("K") != 1 or fen[0].count("k") != 1:
-        raise ValueError("each side needs exactly one king")
-    if fen[1] not in ("w", "b"):
-        raise ValueError("active color must be 'w' or 'b'")
-    if not fen[4].isdigit() or not fen[5].isdigit():
-        raise ValueError("move counters must be integers")
+    if not losses:
+        raise ValueError("loss_history must contain at least one value")
+    if not all(math.isfinite(loss) for loss in losses):
+        raise ValueError("loss_history values must be finite")
+    return losses
 
-def check_chess_file(path : str, need_label : bool) -> None:
-    nb_boards = 0
-    with open(path, encoding="utf-8") as file:
-        for n, line in enumerate(file, 1):
-            tokens = line.split()
-            if not tokens:
-                continue
-            try:
-                check_fen(tokens[:6])
-                label = " ".join(tokens[6:])
-                if need_label and not label:
-                    raise ValueError("expected output is missing")
-                if label and label not in VALID_LABELS:
-                    raise ValueError(f"unknown expected output '{label}'")
-            except ValueError as err:
-                raise ValueError(f"{path}:{n}: {err}") from None
-            nb_boards += 1
-    if nb_boards == 0:
-        raise ValueError(f"{path}: no chessboard found")
 
-def is_train_flag(arg : str, n_arg : int, files_path : tuple[str, str]) -> bool:
-    if arg == MAIN_ACCEPTED_FLAGS[1] and (n_arg == 4 or n_arg == 6):
-        if n_arg == 6:
-            if files_path[0] != "--save":
-                print("Expected '--save SAVEFILE' after --train", file=sys.stderr)
-                sys.exit(ERROR)
-            if not os.path.isdir(os.path.dirname(files_path[1]) or "."):
-                print("The directory of SAVEFILE does not exist", file=sys.stderr)
-                sys.exit(ERROR)
-        data_files = get_data_files(files_path)
-        if data_files_exist(data_files):
-            check_network_file(data_files[0])
-            check_chess_file(data_files[1], need_label=True)
-            return True
-        else:
-            print("One of the given files does not actually exist", file=sys.stderr)
-            sys.exit(ERROR)
-    return False
+def save_as_csv(loss_history : list[float], output_dir : str | Path = "outputs") -> Path:
+    losses = validated_losses(loss_history)
 
-def is_predict_flag(arg : str, n_arg : int, files_path : tuple[str, str]) -> bool:
-    if arg == MAIN_ACCEPTED_FLAGS[0] and n_arg == 4:
-        if data_files_exist(files_path):
-            check_network_file(files_path[0])
-            check_chess_file(files_path[1], need_label=False)
-            return True
-        else:
-            print("One of the given files does not actually exist", file=sys.stderr)
-            sys.exit(ERROR)
-    return False
+    output_path = Path(output_dir)
+    output_path.mkdir(parents=True, exist_ok=True)
+
+    csv_path = output_path / "training_loss" + date.today().isoformat() + ".temp.csv"
+
+    with csv_path.open("w", newline="", encoding="utf-8") as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerow(("epoch", "loss"))
+        writer.writerows(enumerate(losses, start=1))
+
+    return csv_path
+
+
+def save_as_img(loss_history : list[float], output_dir : str | Path = "outputs") -> Path:
+    losses = validated_losses(loss_history)
+    
+    output_path = Path(output_dir)
+    output_path.mkdir(parents=True, exist_ok=True)
+
+    graph_path = output_path / "training_loss" + date.today().isoformat() + ".temp.png"
+
+    epochs = range(1, len(losses) + 1)
+    fig, ax = plt.subplots(figsize=(8, 5))
+
+    ax.plot(epochs, losses, marker="o", color="#2563eb", linewidth=2, markersize=4)
+    ax.set_title("Training loss")
+    ax.set_xlabel("Epoch")
+    ax.set_ylabel("Loss")
+    ax.grid(True, color="#ddd")
+    fig.tight_layout()
+    fig.savefig(graph_path, dpi=150)
+    plt.close(fig)
+
+    return graph_path
+
+
+def save_training_artifacts(loss_history : list[float], output_dir : str | Path = "outputs") -> tuple[Path, Path]:
+    try:
+        graph_path = save_as_img(loss_history, output_dir)
+        csv_path = save_as_csv(loss_history, output_dir)
+    except Exception as err:
+        print(f"Failed to save training artifacts to {output_dir} due to: {err}")
+        sys.exit(ERROR)
+    return graph_path, csv_path

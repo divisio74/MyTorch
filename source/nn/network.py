@@ -1,3 +1,8 @@
+"""
+    network.py
+    ...
+"""
+
 
 class Network:
     def __init__(self, layers):
@@ -32,8 +37,4 @@ class Network:
             optimizer.step(self.layers)
             loss_history.append(loss_value)
         return loss_history
-
-
-
-
-
+    

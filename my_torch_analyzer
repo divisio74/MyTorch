@@ -1,22 +1,18 @@
 #!/bin/python3
 """
     main.py
-    main file of the project
+    Entry point of the project
 """
 
 import sys
+from source.analyzer.modes import run_predict, run_train, split_train_args, is_help_flag, is_predict_flag, is_train_flag
+
 from source.common.constants import (
     ERROR,
     NOERROR,
     HELP_TEXT,
     MAIN_ACCEPTED_FLAGS,
 )
-from source.common.utils import (
-    is_help_flag,
-    is_predict_flag,
-    is_train_flag,
-)
-
 
 def main():
     args = sys.argv
@@ -28,15 +24,17 @@ def main():
     if is_help_flag(main_flag, n_arg):
         print(HELP_TEXT)
         sys.exit(NOERROR)
+
     files_path = args[2:]
     if is_predict_flag(main_flag, n_arg, files_path):
-        print(HELP_TEXT)
+        run_predict(files_path[0], files_path[1])
         sys.exit(NOERROR)
     elif is_train_flag(main_flag, n_arg, files_path):
-        print(HELP_TEXT)
+        loadfile, chessfile, savefile = split_train_args(files_path)
+        run_train(loadfile, chessfile, savefile)
         sys.exit(NOERROR)
     else:
-        print("An unknow argument was given",  file=sys.stderr)
+        print("An unknown argument was given", file=sys.stderr)
         sys.exit(ERROR)
 
 
