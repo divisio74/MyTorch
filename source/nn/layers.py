@@ -1,6 +1,6 @@
 import numpy as np
 
-wdc = 0.01
+Wdc = 0.01
 
 class Layer:
 
