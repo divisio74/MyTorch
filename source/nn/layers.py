@@ -1,7 +1,5 @@
 import numpy as np
 
-Wdc = 0.01
-
 class Layer:
 
     def __init__(self):
@@ -15,8 +13,14 @@ class Layer:
 
 class Dense(Layer):
 
-    def __init__(self, n_input, n_output):
+    def __init__(self, n_input, n_output, init_norm="he"):
         super().__init__()
+        if init_norm == "xavier":
+            wdc = np.sqrt(2/ (n_input + n_output))
+        elif init_norm == "he":
+            wdc = np.sqrt(2 / n_input)
+        else :
+            raise ValueError("No init normalisation parameter !")
         self.params["w"] = wdc * np.random.randn(n_input, n_output)
         self.params["b"] = np.zeros(n_output)
         self.grads["w"] = np.zeros_like(self.params["w"])
