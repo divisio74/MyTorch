@@ -4,8 +4,9 @@
 """
 
 import os
+
 from source.common.constants import MAIN_ACCEPTED_FLAGS
-from source.analyzer.parser import parse_file, parse_line
+from source.analyzer.parser import parse_line
 
 
 def is_help_flag(arg : str, n_arg : int) -> bool:
@@ -13,20 +14,7 @@ def is_help_flag(arg : str, n_arg : int) -> bool:
         return True
     return False
 
-
-def data_files_exist(files_path : tuple[str, str]) -> bool:
-    loadfile = os.path.isfile(files_path[0])
-    chessfile = os.path.isfile(files_path[1])
-    if (loadfile and chessfile):
-        return True
-    return False
-
-
-def get_data_files(files_path : list[str]) -> tuple[str, str]:
-    if len(files_path) == 4:
-        return (files_path[2], files_path[3])
-    return (files_path[0], files_path[1])
-
+#region Check data files
 
 def check_network_file(path : str) -> None:
     if os.path.getsize(path) == 0:
@@ -55,6 +43,30 @@ def check_chess_file(path : str, need_label : bool) -> None:
         raise ValueError(f"invalid CHESSFILE: '{path}' is empty")
 
 
+def get_data_files(files_path : list[str]) -> tuple[str, str]:
+    if len(files_path) == 4:
+        return (files_path[2], files_path[3])
+    return (files_path[0], files_path[1])
+
+
+def data_files_exist(files_path : tuple[str, str]) -> bool:
+    loadfile = os.path.isfile(files_path[0])
+    chessfile = os.path.isfile(files_path[1])
+    if (loadfile and chessfile):
+        return True
+    return False
+
+
+def data_exist(files_path : tuple[str, str], need_label : bool) -> None:
+        if data_files_exist(files_path):
+            check_network_file(files_path[0])
+            check_chess_file(files_path[1], need_label = need_label)
+            return True
+        else:
+            raise ValueError("One of the given files does not actually exist")
+
+#endregion
+
 def is_train_flag(arg : str, n_arg : int, files_path : tuple[str, str]) -> bool:
     if arg == MAIN_ACCEPTED_FLAGS[1] and (n_arg == 4 or n_arg == 6):
         if n_arg == 6:
@@ -63,23 +75,15 @@ def is_train_flag(arg : str, n_arg : int, files_path : tuple[str, str]) -> bool:
             if not os.path.isdir(os.path.dirname(files_path[1]) or "."):
                 raise ValueError(f"invalid SAVEFILE: directory '{os.path.dirname(files_path[1])}' does not exist")
         data_files = get_data_files(files_path)
-        if data_files_exist(data_files):
-            check_network_file(data_files[0])
-            check_chess_file(data_files[1], need_label=True)
-            return True
-        else:
-            raise ValueError("One of the given files does not actually exist")
+        data_exist(data_files, need_label=True)
+        return True
     return False
 
 
 def is_predict_flag(arg : str, n_arg : int, files_path : tuple[str, str]) -> bool:
     if arg == MAIN_ACCEPTED_FLAGS[0] and n_arg == 4:
-        if data_files_exist(files_path):
-            check_network_file(files_path[0])
-            check_chess_file(files_path[1], need_label=False)
-            return True
-        else:
-            raise ValueError("One of the given files does not actually exist")
+        data_exist(files_path, need_label=False)
+        return True
     return False
 
 
@@ -96,15 +100,3 @@ def split_train_args(files_path : list[str]) -> tuple[str, str, str]:
         raise ValueError("usage: --train [--save SAVEFILE] LOADFILE CHESSFILE")
 
     return args[0], args[1], save
-
-
-def run_predict(loadfile : str, chessfile : str) -> None:
-    net = 0#load(loadfile)
-    entries = parse_file(chessfile)
-    print(net)
-
-
-def run_train(loadfile : str, chessfile : str, savefile : str = None, val_ratio : float = 0.1, seed : int = 0) -> None:
-    net = 0#load(loadfile)
-    entries = parse_file(chessfile)
-    print(net)

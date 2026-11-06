@@ -67,18 +67,17 @@ finite-difference checks in `tests/test_gradient.py` are an example.
 
 ## Current limitations
 
-The analyzer CLI does **not** currently build or use `Network`, `Dense`, `MSE`,
-or `SGD`. Its training and prediction routines are implemented separately in
-`source/analyzer/train.py` and `source/analyzer/predict.py` using two arrays of
-weights and a `tanh` hidden activation. Changes to `source/nn` therefore do not
-change analyzer behavior unless the analyzer is explicitly integrated with
-these components.
+The analyzer builds a `Network` from the saved weight matrices, with a `Dense`,
+`Tanh`, and `Dense` sequence. Prediction uses `Network.predict`; training uses
+`Network.fit` with `MSE` and `SGD`. The analyzer continues to store weights in
+its JSON model format and stores learned dense-layer biases when saving a
+trained model. Older models without biases are loaded with zero biases.
 
 Also, `Dense` accepts `init_norm="he"` or `"xavier"`, but although it computes
 the corresponding scale, the current weight assignment uses the separate
 `WDC` constant. Do not assume the selected initialization mode currently
-changes the initialized weight scale.
+changes the initialized weight scale. The analyzer replaces the initialized
+weights and biases with values from its model before using the network.
 
 `CrossEntropy` exists in `source/nn/losses.py`, but its `forward` and
-`backward` methods are unfinished. Use `MSE` for the currently implemented
-network training flow.
+`backward` methods are unfinished. The analyzer therefore trains with `MSE`.

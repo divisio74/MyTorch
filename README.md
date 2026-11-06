@@ -60,9 +60,9 @@ See [docs/test.md](docs/test.md) for the test commands and coverage,
 
 ## Current scope and future work
 
-The analyzer currently uses a small hand-written NumPy model and does not yet
-report validation metrics or training-loss artifacts as part of its training
-workflow. Potential next steps include logging each run and its random seed,
-benchmarking and documenting hyperparameter choices, measuring overfitting,
-automatically promoting a model only when it beats the validated version,
-reviewing data-privacy requirements, and exploring parallelism.
+The analyzer uses the reusable NumPy network components in `source/nn` and
+writes per-epoch training and validation metrics to `outputs/`. Potential
+next steps include logging each run and its random seed, benchmarking and
+documenting hyperparameter choices, measuring overfitting, automatically
+promoting a model only when it beats the validated version, reviewing
+data-privacy requirements, and exploring parallelism.

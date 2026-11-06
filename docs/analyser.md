@@ -55,8 +55,8 @@ or determine whether the supplied label is factually correct.
 3. `fen_to_board_vector` converts the piece-placement field to 64 numeric
    values. White pieces have positive values, black pieces negative values;
    each piece type has a different magnitude.
-4. `predict_label` multiplies the vector by the first weight matrix, applies
-   `tanh`, multiplies by the second matrix, and selects the label with the
+4. `predict_label` builds the model's `Network` and uses `Network.predict` to
+   apply its dense, `tanh`, and dense layers, then selects the label with the
    highest score.
 5. The program prints each normalized FEN and its predicted label.
 
@@ -71,23 +71,23 @@ only in those fields therefore have identical model inputs.
    ratio `0.1`; the current CLI uses the default seed `0`).
 3. Load the model and check that its output dimension matches the eight labels.
 4. For each of the 100 configured epochs, train sequentially on each training
-   position using a `tanh` hidden layer, a mean-squared-error gradient, and a
-   learning rate of `0.01`.
-5. Save the updated weights and print the number of training and validation
-   entries.
+   position using `Network.fit`, a `tanh` hidden layer, mean squared error, and
+   SGD with a learning rate of `0.01`.
+5. Evaluate loss and accuracy on the training and validation subsets, and save
+   the updated model plus per-epoch CSV and PNG metric files in `outputs/`.
 
-The current validation subset is counted but **not evaluated**: no validation
-loss or accuracy is calculated, and it does not affect training or model
-selection. Training also does not currently shuffle examples between epochs,
-record per-epoch loss, or automatically compare/publish a candidate model.
-Those are possible extensions, not current behavior.
+The validation subset is evaluated but does not affect training or model
+selection. Training does not currently shuffle examples between epochs or
+automatically compare and publish a candidate model.
 
 ## Model files
 
 Models are JSON documents with the format identifier `mytorch-chess-v1`,
 dimension metadata, and two weight matrices. The first matrix maps 64 input
 features to the hidden layer, and the second maps the hidden layer to the
-eight label scores. New default models use reproducible nonzero weights.
+eight label scores. Trained models also include the two dense-layer bias
+vectors; models without biases use zero biases. New default models use
+reproducible nonzero weights.
 
 The model loader initializes a default model when an existing file is empty,
 malformed JSON, or not a JSON object. A JSON object with weights is returned
@@ -96,7 +96,7 @@ provide a valid model JSON rather than relying on this fallback.
 
 ## Implementation boundaries
 
-The analyzer has its own training and prediction implementation in
-`source/analyzer/train.py` and `source/analyzer/predict.py`. It does not use the
-separate general-purpose classes in `source/nn`. See [nn.md](nn.md) for those
-components and how to extend them.
+The analyzer's training and prediction workflows are in
+`source/analyzer/train.py` and `source/analyzer/predict.py`; their model
+computation uses the reusable classes in `source/nn`. See [nn.md](nn.md) for
+those components and how to extend them.

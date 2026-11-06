@@ -6,6 +6,7 @@ from pathlib import Path
 
 from source.analyzer.modes import check_chess_file, check_fen
 from source.analyzer.parser import parse_file, parse_line
+from source.analyzer.save import save_as_csv, save_as_img
 from source.common.constants import LABELS
 
 
@@ -88,6 +89,21 @@ class AnalyzerParserTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "each side needs exactly one king"):
             check_fen("4k3/8/8/8/8/8/8/8 w - - 0 1".split())
 
+
+class AnalyzerArtifactTests(unittest.TestCase):
+    def test_training_artifacts_are_written_to_output_directory(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output_dir = Path(directory) / "artifacts"
+
+            csv_path = save_as_csv([1.0, 0.5], output_dir)
+            image_path = save_as_img([1.0, 0.5], output_dir)
+
+            self.assertTrue(csv_path.is_file())
+            self.assertTrue(image_path.is_file())
+            self.assertEqual(
+                csv_path.read_text(encoding="utf-8").splitlines(),
+                ["epoch,loss", "1,1.0", "2,0.5"],
+            )
 
 class AnalyzerCliTests(unittest.TestCase):
     def setUp(self):

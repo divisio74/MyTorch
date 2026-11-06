@@ -5,13 +5,14 @@
 """
 
 import sys
-from source.analyzer.modes import run_predict, run_train, split_train_args, is_help_flag, is_predict_flag, is_train_flag
+from source.analyzer.modes import split_train_args, is_help_flag, is_predict_flag, is_train_flag
+#from source.analyzer.predict import run_predict
+#from source.analyzer.train import run_train
 
 from source.common.constants import (
     ERROR,
     NOERROR,
-    HELP_TEXT,
-    MAIN_ACCEPTED_FLAGS,
+    HELP_TEXT
 )
 
 def main():
@@ -20,6 +21,7 @@ def main():
     if n_arg < 2:
         print("Missing arguments, try --help", file=sys.stderr)
         sys.exit(ERROR)
+
     main_flag = args[1]
     if is_help_flag(main_flag, n_arg):
         print(HELP_TEXT)
@@ -27,11 +29,11 @@ def main():
 
     files_path = args[2:]
     if is_predict_flag(main_flag, n_arg, files_path):
-        run_predict(files_path[0], files_path[1])
+        #run_predict(files_path[0], files_path[1])
         sys.exit(NOERROR)
     elif is_train_flag(main_flag, n_arg, files_path):
         loadfile, chessfile, savefile = split_train_args(files_path)
-        run_train(loadfile, chessfile, savefile)
+        #run_train(loadfile, chessfile, savefile)
         sys.exit(NOERROR)
     else:
         print("An unknown argument was given", file=sys.stderr)
