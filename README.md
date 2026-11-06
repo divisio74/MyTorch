@@ -11,6 +11,13 @@ positions written in FEN notation.
 Install the dependencies from the repository root:
 
 ```sh
+# Create a virtual environment if you don't already have one
+python -m venv .venv
+
+# Activate it (Linux/macOS)
+source .venv/bin/activate
+
+# Windows PowerShell: .venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
 ```
 
