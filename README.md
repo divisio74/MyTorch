@@ -1,223 +1,243 @@
-# MyTorch chess analyzer
+# MyTorch : analyseur de positions d'échecs
 
+Un petit projet de réseau de neurones en NumPy, avec un analyseur en ligne de
+commande pour des positions d'échecs écrites en notation FEN.
 
-my torch networkd 
+Le dépôt ne doit contenir qu'**un seul** fichier dont le nom commence par
+`my_torch_network` (`my_torch_network_full.nn`) : la mouli le cherche avec
+`find . -type f -name "my_torch_network*"` et ne doit trouver qu'un modèle.
 
-car find . -type  f -name "my_torch_netxwork* ne doit matcher qu'un model
+## Prérequis
 
-A small NumPy-based neural-network project with a command-line analyzer for chess
-positions written in FEN notation.
+- Python 3.10 ou plus récent
+- Les paquets de `requirements.txt` (`numpy` et `matplotlib`)
 
-## Requirements
-
-- Python 3.10 or newer
-- The packages listed in `requirements.txt` (`numpy` and `matplotlib`)
-
-Install the dependencies from the repository root:
+Installer les dépendances depuis la racine du dépôt :
 
 ```sh
-# Create a virtual environment if you don't already have one
+# Créer un environnement virtuel si besoin
 python -m venv .venv
 
-# Activate it (Linux/macOS)
+# L'activer (Linux/macOS)
 source .venv/bin/activate
 
-# Windows PowerShell: .venv\Scripts\Activate.ps1
+# Windows PowerShell : .venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
 ```
 
-## Quick start
+## Démarrage rapide
 
 ```sh
-python3 scripts/build_dataset.py 50000 data/dataset.npz   # encode and balance assets/
+make                                                       # crée l'exécutable my_torch_analyzer
+python3 scripts/build_dataset.py 50000 data/dataset.npz   # encode et équilibre assets/
 python3 scripts/train.py --limit 200000 --hidden 128 64 --dropout 0.3 --batch-size 32 --l2 0.0001 --epochs 25 --patience 5 --out my_torch_network_full.nn
-python3 my_torch_analyzer --predict my_torch_network_full.nn positions.txt
+./my_torch_analyzer --predict my_torch_network_full.nn positions.txt
 ```
 
-The pre-trained network `my_torch_network_full.nn` is in the repository.
+Le réseau pré-entraîné `my_torch_network_full.nn` est dans le dépôt.
 
-## Run the analyzer
+## Lancer l'analyseur
 
-The command-line entry point is `my_torch_analyzer`:
+Le point d'entrée en ligne de commande est `my_torch_analyzer` (créé par `make`
+à partir de `my_torch_analyzer.py` ; `make re`, `make clean` et `make fclean`
+existent) :
 
 ```sh
-python3 my_torch_analyzer --help
-python3 my_torch_analyzer --predict my_torch_network_full.nn positions.txt
-python3 my_torch_analyzer --train my_torch_network_full.nn labeled-positions.txt
-python3 my_torch_analyzer --train --save trained.nn my_torch_network_full.nn labeled-positions.txt
+./my_torch_analyzer --help
+./my_torch_analyzer --predict my_torch_network_full.nn positions.txt
+./my_torch_analyzer --train my_torch_network_full.nn positions-etiquetees.txt
+./my_torch_analyzer --train --save entraine.nn my_torch_network_full.nn positions-etiquetees.txt
 ```
 
-Training without `--save` updates the model at `LOADFILE`. With `--save`, the
-updated model is written to `SAVEFILE` and `LOADFILE` is left unchanged. Errors
-are written on the error output and the exit code is 84 (0 otherwise).
+Sans `--save`, l'entraînement met à jour le modèle de `LOADFILE`. Avec `--save`,
+le modèle mis à jour est écrit dans `SAVEFILE` et `LOADFILE` n'est pas modifié.
+Les erreurs sont écrites sur la sortie d'erreur et le code de retour est 84
+(0 sinon).
 
-Each non-empty line in a chess input file starts with a six-field FEN position.
-Training lines must end with a label; prediction labels are optional:
+Chaque ligne non vide d'un fichier d'échecs commence par une position FEN à six
+champs. Les lignes d'entraînement doivent finir par une étiquette ; en
+prédiction, l'étiquette est facultative :
 
 ```text
 4k3/8/8/8/8/8/8/4K3 w - - 0 1 Nothing
 ```
 
-In prediction mode, one line is printed per board, in the same order, among
-`Nothing`, `Check White`, `Check Black`, `Checkmate White`, `Checkmate Black`.
-The colour is the side that gives the check. A network only accepts the
-labels of its five classes: training with `Check`, `Checkmate` or `Stalemate`
-is refused with an error (`assets/` has no stalemate position).
+En mode prédiction, une ligne est affichée par échiquier, dans le même ordre,
+parmi `Nothing`, `Check White`, `Check Black`, `Checkmate White`,
+`Checkmate Black`. La couleur est celle du camp qui donne l'échec. Un réseau
+n'accepte que les étiquettes de ses cinq classes : entraîner avec `Check`,
+`Checkmate` ou `Stalemate` est refusé avec une erreur (`assets/` ne contient
+aucune position de pat).
 
-Generate blank networks from a configuration file:
+Générer des réseaux vierges à partir d'un fichier de configuration :
 
 ```sh
 ./my_torch_generator configs/basic_network.conf 3   # basic_network_1.nn ... _3.nn
 ```
 
-## Project layout
+## Organisation du dépôt
 
-| path | content |
+| chemin | contenu |
 |---|---|
-| `source/nn/` | neural-network module: layers, activations, losses, optimisers, `Network`, save/load, generator, random search |
-| `source/analyzer/` | FEN parser, FEN encoding, CLI modes, glue between the CLI and the network (`pipeline.py`) |
-| `scripts/` | dataset building, training, benchmarks (needed to rebuild the network) |
-| `bonus/` | hyperparameter random search |
-| `configs/` | example configuration for the generator |
-| `logs/` | one JSON per training run (configuration, seed, curves, accuracies, confusion matrix) and the benchmark results |
+| `source/nn/` | module de réseau de neurones : couches, activations, pertes, optimiseurs, `Network`, sauvegarde/chargement, générateur, recherche aléatoire |
+| `source/analyzer/` | parseur FEN, encodage FEN, modes de la CLI, liaison entre la CLI et le réseau (`pipeline.py`) |
+| `scripts/` | construction du dataset, entraînement, benchmarks (nécessaires pour reconstruire le réseau) |
+| `bonus/` | recherche aléatoire d'hyperparamètres |
+| `configs/` | exemple de configuration pour le générateur |
+| `logs/` | un JSON par entraînement (configuration, graine, courbes, précisions, matrice de confusion) et les résultats des benchmarks |
 | `docs/` | [chosen_config.md](docs/chosen_config.md), [training.md](docs/training.md), [benchmarks.md](docs/benchmarks.md), [benchmarks_tables.md](docs/benchmarks_tables.md), [nn.md](docs/nn.md), [analyser.md](docs/analyser.md), [test.md](docs/test.md) |
 
-## The neural network
+## Le réseau de neurones
 
-Network: `971 -> 128 -> 64 -> 5`, ReLU, He initialisation on hidden layers,
-Xavier on the output layer, softmax, cross-entropy loss, Adam (0.001),
-mini-batches of 32, dropout 0.3, L2 0.0001, early stopping. Each value is
-justified, with the benchmark images, in [docs/chosen_config.md](docs/chosen_config.md). Pure NumPy, no machine-learning library. The `.nn` file is
-JSON (`"format": "mytorch-chess-v1"`, list of layers with weights and biases).
+Réseau : `971 -> 128 -> 64 -> 5`, ReLU, initialisation He sur les couches
+cachées, Xavier sur la couche de sortie, softmax, perte d'entropie croisée,
+Adam (0,001), mini-batchs de 32, dropout 0,3, L2 0,0001, arrêt anticipé. Chaque
+valeur est justifiée, avec les images des benchmarks, dans
+[docs/chosen_config.md](docs/chosen_config.md). NumPy pur, aucune bibliothèque
+d'apprentissage automatique. Le fichier `.nn` est du JSON
+(`"format": "mytorch-chess-v1"`, liste de couches avec poids et biais).
 
-The input has 971 features: piece-on-square one-hot (768), side to move,
-castling rights, en passant square, squares attacked by each side (128), and
-for each king: in check, number of checkers, free escape squares. These are
-computed from the board only, never from the label. Details in
+L'entrée compte 971 caractéristiques : one-hot de la pièce sur chaque case
+(768), camp qui joue, droits de roque, case de prise en passant, cases
+attaquées par chaque camp (128) et, pour chaque roi : en échec, nombre de
+pièces qui l'attaquent, cases de fuite libres. Elles sont calculées à partir de
+l'échiquier seul, jamais de l'étiquette. Détails dans
 [docs/training.md](docs/training.md).
 
-### Results
+### Résultats
 
-Pre-trained network, 200 000 balanced positions (160 000 train / 20 000
-validation / 20 000 test):
+Réseau pré-entraîné, 200 000 positions équilibrées (160 000 entraînement /
+20 000 validation / 20 000 test) :
 
-| train | validation | test | 25 000 held-out positions |
+| entraînement | validation | test | 25 000 positions mises de côté |
 |---|---|---|---|
-| 96.5 % | 96.3 % | 96.4 % | 96.3 % |
+| 96,5 % | 96,3 % | 96,4 % | 96,3 % |
 
-`Nothing` and the colour of the side giving check are never mixed up. All
-errors are between a check and a checkmate of the same colour (the network
-estimates whether the king can run away, but does not simulate blocking or
-capturing the checking piece). Training and validation accuracy are almost
-equal: the network does not overfit. The earlier network (batch 128, no
-regularisation, 150 000 positions) got 95.8 % on the same held-out positions;
-it is kept in `bonus/bonus_network_batch128.nn`. Curves, confusion matrix and
-details: [docs/chosen_config.md](docs/chosen_config.md).
+`Nothing` et la couleur du camp qui donne l'échec ne sont jamais confondus.
+Toutes les erreurs sont entre un échec et un échec et mat de la même couleur
+(le réseau estime si le roi peut fuir, mais ne simule pas le blocage ni la
+capture de la pièce qui donne l'échec). Les précisions d'entraînement et de
+validation sont presque égales : le réseau ne surapprend pas. Le réseau
+précédent (batch 128, sans régularisation, 150 000 positions) obtenait 95,8 %
+sur les mêmes positions mises de côté ; il est conservé dans
+`bonus/bonus_network_batch128.nn`. Courbes, matrice de confusion et détails :
+[docs/chosen_config.md](docs/chosen_config.md).
 
-## Design choices
+Test supplémentaire sur 30 000 positions de `assets/` jamais vues par le réseau
+(6 000 par classe) : 96,4 % au total ; 98,9 % avec 10 pièces, 96,5 % avec 20
+pièces, 93,3 % avec beaucoup de pièces. Le réseau annonce parfois un mat alors
+que c'est seulement un échec, presque jamais l'inverse.
 
-Each choice, the reason, and the evidence. Measured results come from
-`scripts/benchmark.py` (one variable changed at a time, 24 000 positions,
-8 epochs, seed 0). Full tables: [docs/benchmarks_tables.md](docs/benchmarks_tables.md).
+## Choix de conception
 
-| choice | kept | tried / rejected | why |
+Chaque choix, sa raison et les preuves. Les résultats mesurés viennent de
+`scripts/benchmark.py` (une seule variable change à la fois, 24 000 positions,
+8 époques, graine 0). Tableaux complets :
+[docs/benchmarks_tables.md](docs/benchmarks_tables.md).
+
+| choix | retenu | essayé / rejeté | pourquoi |
 |---|---|---|---|
-| hidden activation | ReLU | leaky ReLU, tanh, sigmoid | ReLU, leaky ReLU and tanh are equivalent (test accuracy 0.920 / 0.921 / 0.920). Sigmoid is worse (0.875): its derivative is at most 0.25, the gradient shrinks layer after layer. ReLU is the cheapest and does not saturate. |
-| output activation | softmax | sigmoid, none | five exclusive classes need probabilities that sum to 1; softmax with cross-entropy gives the simple gradient `(p - y) / N`. |
-| loss | cross-entropy | MSE | MSE only used to validate the library on XOR; cross-entropy is the loss made for classification. |
-| initialisation | He (hidden), Xavier (output) | Xavier, constant 0.01 | He 0.920 vs Xavier 0.917 with ReLU (inside the noise, but consistent with the theory: He compensates the half of the signal that ReLU removes). A constant scale of 0.01 blocked the XOR network at a loss of 0.25: the signal vanishes through the layers. |
-| optimiser | Adam (0.001) | SGD, momentum | SGD at 0.05 is the slowest (0.881). Momentum 0.931 and Adam 0.920 are close; Adam needs far less learning-rate tuning. |
-| learning rate | 0.001 | 0.0003, 0.01 | 0.0003 is too slow (0.875); 0.01 is unstable (training loss lower but validation loss higher). |
-| batch size | 32 | 128, 512 | with a fixed number of epochs, smaller batches make more updates: 32 gives 0.924, 128 gives 0.920, 512 gives 0.860, and the cost per epoch is about the same. The random search agrees. |
-| architecture | 128 -> 64 | 32, 64, 128, 64 -> 32 | accuracy grows with capacity then saturates (0.892, 0.907, 0.908, 0.920, 0.916). The largest network overfits on 24 000 positions (train 0.988, validation 0.920). 128 -> 64 is used because the final training set is much larger (160 000 positions) and the network is regularised. |
-| overfitting | dropout 0.3 + L2 1e-4 + early stopping (patience 5) + large dataset | each alone, dropout 0.1 | on 6 000 positions the plain network reaches train 1.000 / validation 0.843 and L2 improves it (0.863). On the chosen architecture, the combination batch 32 + L2 + dropout 0.3 has the best validation loss (0.172 vs 0.207 for the previous setting). Early stopping restores the best weights. |
-| input features | 971 with attack maps | raw 837 (pieces, turn, castling, en passant) | check is a geometric property that a small network learns poorly from raw squares, so attack and king features are given as inputs. This is feature engineering, the network still learns the labelling. The raw-only encoding was not benchmarked. |
+| activation cachée | ReLU | leaky ReLU, tanh, sigmoïde | ReLU, leaky ReLU et tanh sont équivalentes (précision test 0,920 / 0,921 / 0,920). La sigmoïde est moins bonne (0,875) : sa dérivée vaut au plus 0,25, le gradient diminue de couche en couche. ReLU est la moins coûteuse et ne sature pas. |
+| activation de sortie | softmax | sigmoïde, aucune | cinq classes exclusives demandent des probabilités de somme 1 ; softmax avec l'entropie croisée donne le gradient simple `(p - y) / N`. |
+| perte | entropie croisée | MSE | la MSE a seulement servi à valider la bibliothèque sur le XOR ; l'entropie croisée est la perte faite pour la classification. |
+| initialisation | He (cachées), Xavier (sortie) | Xavier, constante 0,01 | He 0,920 contre Xavier 0,917 avec ReLU (dans le bruit, mais cohérent avec la théorie : He compense la moitié du signal que ReLU supprime). Une échelle constante de 0,01 bloquait le réseau XOR à une perte de 0,25 : le signal s'éteint à travers les couches. |
+| optimiseur | Adam (0,001) | SGD, momentum | SGD à 0,05 est le plus lent (0,881). Momentum 0,931 et Adam 0,920 sont proches ; Adam demande bien moins de réglage du learning rate. |
+| learning rate | 0,001 | 0,0003, 0,01 | 0,0003 est trop lent (0,875) ; 0,01 est instable (perte d'entraînement plus basse mais perte de validation plus haute). |
+| taille de batch | 32 | 128, 512 | à nombre d'époques fixé, un petit batch fait plus de mises à jour : 32 donne 0,924, 128 donne 0,920, 512 donne 0,860, pour un coût par époque à peu près identique. La recherche aléatoire va dans le même sens. |
+| architecture | 128 -> 64 | 32, 64, 128, 64 -> 32 | la précision augmente avec la capacité puis sature (0,892, 0,907, 0,908, 0,920, 0,916). Le plus grand réseau surapprend sur 24 000 positions (entraînement 0,988, validation 0,920). 128 -> 64 est retenu car le jeu d'entraînement final est bien plus grand (160 000 positions) et le réseau est régularisé. |
+| surapprentissage | dropout 0,3 + L2 1e-4 + arrêt anticipé (patience 5) + grand dataset | chacun seul, dropout 0,1 | sur 6 000 positions, le réseau simple atteint 1,000 en entraînement / 0,843 en validation et L2 l'améliore (0,863). Sur l'architecture retenue, la combinaison batch 32 + L2 + dropout 0,3 a la meilleure perte de validation (0,172 contre 0,207 pour le réglage précédent). L'arrêt anticipé restaure les meilleurs poids. |
+| caractéristiques d'entrée | 971 avec cartes d'attaque | 837 brutes (pièces, camp, roque, prise en passant) | l'échec est une propriété géométrique qu'un petit réseau apprend mal à partir des cases brutes ; on lui donne donc des caractéristiques d'attaque et de roi. C'est de l'ingénierie de caractéristiques, le réseau apprend toujours l'étiquetage. L'encodage brut seul n'a pas été comparé. |
 
-L2 and Adam: the final network applies L2 (1e-4) by adding `l2 * w` to the gradient
-before the Adam step. With Adam this penalty is divided by the adaptive scale
-of each weight, so it is not a uniform weight decay. `AdamW` (decoupled weight
-decay, `source/nn/optimizers.py`, `--optimizer adamw --weight-decay`) is
-implemented and unit-tested, but the final network was not retrained with it,
-so its effect is not measured. With such a small `l2` and no overfitting
-(train 96.5 % / validation 96.3 %), the difference is expected to be small.
+L2 et Adam : le réseau final applique L2 (1e-4) en ajoutant `l2 * w` au gradient
+avant le pas d'Adam. Avec Adam, cette pénalité est divisée par l'échelle
+adaptative de chaque poids : ce n'est donc pas une décroissance des poids
+uniforme. `AdamW` (décroissance des poids découplée, `source/nn/optimizers.py`,
+`--optimizer adamw --weight-decay`) est implémenté et testé unitairement, mais
+le réseau final n'a pas été réentraîné avec ; son effet n'est donc pas mesuré.
+Avec un `l2` aussi petit et sans surapprentissage (entraînement 96,5 % /
+validation 96,3 %), la différence devrait être faible.
 
-### Random search (bonus)
+### Recherche aléatoire (bonus)
 
-`bonus/hyperparameter_search.py` samples learning rate, architecture, batch
-size, activation, dropout and L2 together (10 trials, 8 epochs, 24 000
-positions). Results in `logs/hyperparameter_search.json`:
+`bonus/hyperparameter_search.py` tire ensemble le learning rate, l'architecture,
+la taille de batch, l'activation, le dropout et L2 (10 essais, 8 époques,
+24 000 positions). Résultats dans `logs/hyperparameter_search.json` :
 
-| rank | val loss | val accuracy | lr | hidden | batch | activation | dropout | L2 |
+| rang | perte val. | précision val. | lr | cachées | batch | activation | dropout | L2 |
 |---|---|---|---|---|---|---|---|---|
-| 1 | 0.167 | 0.938 | 0.0014 | 32 | 32 | relu | 0.3 | 1e-4 |
-| 2 | 0.177 | 0.934 | 0.0048 | 32 | 64 | leaky ReLU | 0.1 | 1e-4 |
-| 3 | 0.184 | 0.929 | 0.0022 | 32 | 32 | leaky ReLU | 0.1 | 1e-3 |
-| 5 | 0.212 | 0.918 | 0.0019 | 128 -> 64 | 256 | tanh | 0.3 | 0 |
-| 10 | 0.351 | 0.859 | 0.0007 | 64 | 256 | relu | 0.1 | 1e-3 |
+| 1 | 0,167 | 0,938 | 0,0014 | 32 | 32 | relu | 0,3 | 1e-4 |
+| 2 | 0,177 | 0,934 | 0,0048 | 32 | 64 | leaky ReLU | 0,1 | 1e-4 |
+| 3 | 0,184 | 0,929 | 0,0022 | 32 | 32 | leaky ReLU | 0,1 | 1e-3 |
+| 5 | 0,212 | 0,918 | 0,0019 | 128 -> 64 | 256 | tanh | 0,3 | 0 |
+| 10 | 0,351 | 0,859 | 0,0007 | 64 | 256 | relu | 0,1 | 1e-3 |
 
-Reading: the best runs all use a small batch (32 or 64), and the worst a large
-batch or a low learning rate. With a fixed budget of 8 epochs, the batch size
-dominates because it sets the number of updates; the small `[32]` network is
-not better in itself, it is fast to train. This agrees with the one-at-a-time
-sweeps (batch 32 best, 512 worst, lr 0.0003 too slow).
+Lecture : les meilleurs essais utilisent tous un petit batch (32 ou 64), et les
+pires un grand batch ou un learning rate bas. Avec un budget fixe de 8 époques,
+la taille de batch domine car elle fixe le nombre de mises à jour ; le petit
+réseau `[32]` n'est pas meilleur en soi, il s'entraîne simplement vite. Cela
+rejoint les balayages un paramètre à la fois (batch 32 meilleur, 512 pire,
+lr 0,0003 trop lent).
 
-## What we tried and what did not work
+## Ce qu'on a essayé et qui n'a pas marché
 
-- Constant weight scale 0.01: XOR stuck at loss 0.25 (vanishing signal). Fixed by Xavier / He.
-- Sigmoid in hidden layers: clearly worse than ReLU / tanh.
-- Plain SGD: slow, needs a large learning rate and many epochs.
-- Large batches (512) and low learning rates (0.0003): not enough updates in the epoch budget.
-- Dropout 0.3 alone on a small dataset: no real gain; it helped only combined with L2 and a small batch on the larger network.
-- The gain of the final training over the previous one is small on held-out data (95.8 % to 96.3 %), much less than the 24 000-position comparison suggested.
+- Échelle de poids constante 0,01 : XOR bloqué à une perte de 0,25 (signal qui s'éteint). Corrigé par Xavier / He.
+- Sigmoïde dans les couches cachées : nettement moins bonne que ReLU / tanh.
+- SGD simple : lent, demande un grand learning rate et beaucoup d'époques.
+- Grands batchs (512) et learning rates bas (0,0003) : pas assez de mises à jour dans le budget d'époques.
+- Dropout 0,3 seul sur un petit dataset : pas de gain réel ; il n'a aidé qu'avec L2 et un petit batch sur le plus grand réseau.
+- Le gain de l'entraînement final sur le précédent est faible sur les données mises de côté (95,8 % à 96,3 %), bien moins que ce que suggérait la comparaison sur 24 000 positions.
 
-## Limits and honest caveats
+## Limites et réserves
 
-- Every benchmark variant was run once (seed 0). Differences below about 0.5
-  point are noise. Multi-seed runs were not done.
-- The sweeps change one variable at a time, so interactions are not measured;
-  the random search covers some of them but with only 10 trials.
-- The final configuration comes from a comparison of six combinations on 24 000
-  positions with one seed, whose curves oscillate: part of the advantage of the
-  chosen one may be noise.
-- The validation loss of the final training jumps at epoch 11 before recovering
-  (early stopping returned the weights of epoch 7).
-- The test set comes from the same generator as the training set. The training
-  data is balanced; real games contain mostly `Nothing`, so precision on rare
-  classes would be lower there.
-- Stalemate is not handled (no stalemate position in `assets/`).
+- Chaque variante des benchmarks n'a été lancée qu'une fois (graine 0). Les écarts
+  inférieurs à environ 0,5 point sont du bruit. Pas de lancements avec plusieurs
+  graines.
+- Les balayages font varier une variable à la fois : les interactions ne sont pas
+  mesurées ; la recherche aléatoire en couvre une partie, mais avec seulement 10
+  essais.
+- La configuration finale vient d'une comparaison de six combinaisons sur 24 000
+  positions avec une seule graine, dont les courbes oscillent : une partie de
+  l'avantage de la configuration retenue peut être du bruit.
+- La perte de validation de l'entraînement final saute à l'époque 11 avant de
+  redescendre (l'arrêt anticipé a rendu les poids de l'époque 7).
+- Le jeu de test vient du même générateur que le jeu d'entraînement. Les données
+  d'entraînement sont équilibrées ; les vraies parties contiennent surtout
+  `Nothing`, donc la précision sur les classes rares y serait plus faible.
+- Le pat n'est pas géré (aucune position de pat dans `assets/`).
 
-## Ideas not done
+## Pistes non réalisées
 
-- Features that give the network what it lacks (blocking and capturing the checking piece), rather than more training, to reduce the check / checkmate confusion; more positions (we used 200 000 of about 720 000).
-- A learning-rate schedule.
-- Features that simulate blocking and capturing the checking piece.
-- Batch normalisation, class weights, learning-rate schedule.
-- Multi-seed benchmarks and a larger random search.
-- Stalemate (needs positions that are not in `assets/`).
-- Parallelism (multi-processing for the benchmarks is already used; the training itself is single-process).
+- Des caractéristiques qui donnent au réseau ce qui lui manque (simuler le blocage et la capture de la pièce qui donne l'échec), plutôt que plus d'entraînement, pour réduire la confusion échec / échec et mat ; plus de positions (on en a utilisé 200 000 sur environ 720 000).
+- Un planning de learning rate.
+- Normalisation par batch, poids de classes.
+- Benchmarks avec plusieurs graines et recherche aléatoire plus large.
+- Le pat (demande des positions absentes de `assets/`).
+- Parallélisme (le multiprocessing est déjà utilisé pour les benchmarks ; l'entraînement lui-même tourne dans un seul processus).
 
-## If we started again
+## Si on recommençait
 
-We would generate our own labelled positions with a chess engine (to include
-stalemate and realistic class proportions), and keep a held-out test set from a
-different source. We would also benchmark the raw encoding against the
-engineered features, and set the batch size from the start with the random
-search. A convolutional layer over the board would be a natural alternative,
-at the cost of a more complex backward pass.
+On générerait nos propres positions étiquetées avec un moteur d'échecs (pour
+inclure le pat et des proportions de classes réalistes), et on garderait un jeu
+de test issu d'une autre source. On comparerait aussi l'encodage brut aux
+caractéristiques ajoutées, et on fixerait la taille de batch dès le départ avec
+la recherche aléatoire. Une couche convolutive sur l'échiquier serait une
+alternative naturelle, au prix d'une rétropropagation plus complexe.
 
-## Data and privacy (GDPR)
+## Données et vie privée (RGPD)
 
-The data is made of chess positions (FEN strings) and their labels. It contains
-no personal data. The project does not collect or send anything.
+Les données sont des positions d'échecs (chaînes FEN) et leurs étiquettes. Elles
+ne contiennent aucune donnée personnelle. Le projet ne collecte ni n'envoie
+rien.
 
-## Run the tests
+## Lancer les tests
 
-From the repository root:
+Depuis la racine du dépôt (après `make`, car les tests de l'analyseur utilisent
+l'exécutable `my_torch_analyzer`) :
 
 ```sh
 python -m unittest discover -s tests -v
 ```
 
-See [docs/test.md](docs/test.md) for the test commands and coverage,
-[docs/analyser.md](docs/analyser.md) for the analyzer workflow, and
-[docs/nn.md](docs/nn.md) for the neural-network components.
+Voir [docs/test.md](docs/test.md) pour les commandes de test et la couverture,
+[docs/analyser.md](docs/analyser.md) pour le fonctionnement de l'analyseur, et
+[docs/nn.md](docs/nn.md) pour les composants du réseau de neurones.
