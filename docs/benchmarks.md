@@ -57,7 +57,7 @@ The final configuration (batch 32, L2 1e-4, dropout 0.3, 200 000 positions) and
 its results are in [chosen_config.md](chosen_config.md): 0.964 on its test set
 and 0.963 on 25 000 held-out positions, against 0.958 for the earlier network
 (batch 128, no regularisation, 150 000 positions, kept in
-`bonus/my_torch_network_batch128.nn`).
+`bonus/bonus_network_batch128.nn`).
 
 All errors are between a check and a checkmate of the same colour: the network
 estimates whether the king can escape, but does not simulate blocking or
