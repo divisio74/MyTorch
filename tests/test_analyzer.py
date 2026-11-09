@@ -6,6 +6,8 @@ from pathlib import Path
 
 from source.analyzer.modes import check_chess_file, check_fen
 from source.analyzer.parser import parse_file, parse_line
+from source.analyzer.encoding import CLASSES, N_FEATURES
+from source.nn.generator import build_network
 from source.common.constants import LABELS
 
 
@@ -97,7 +99,7 @@ class AnalyzerCliTests(unittest.TestCase):
         self.trainfile = self.directory / "train.txt"
         self.predictfile = self.directory / "predict.txt"
         self.savefile = self.directory / "saved-network.dat"
-        self.loadfile.write_text("network placeholder\n", encoding="utf-8")
+        build_network({"input": N_FEATURES, "hidden": [8], "output": len(CLASSES)}).save(str(self.loadfile))
         self.trainfile.write_text(f"{VALID_FEN} Nothing\n", encoding="utf-8")
         self.predictfile.write_text(f"{VALID_FEN}\n", encoding="utf-8")
 

@@ -6,6 +6,7 @@
 import os
 from source.common.constants import MAIN_ACCEPTED_FLAGS
 from source.analyzer.parser import parse_file, parse_line
+from source.analyzer import pipeline
 
 
 def is_help_flag(arg : str, n_arg : int) -> bool:
@@ -99,12 +100,8 @@ def split_train_args(files_path : list[str]) -> tuple[str, str, str]:
 
 
 def run_predict(loadfile : str, chessfile : str) -> None:
-    net = 0#load(loadfile)
-    entries = parse_file(chessfile)
-    print(net)
+    pipeline.run_predict(loadfile, chessfile)
 
 
 def run_train(loadfile : str, chessfile : str, savefile : str = None, val_ratio : float = 0.1, seed : int = 0) -> None:
-    net = 0#load(loadfile)
-    entries = parse_file(chessfile)
-    print(net)
+    pipeline.run_train(loadfile, chessfile, savefile, val_ratio, seed)

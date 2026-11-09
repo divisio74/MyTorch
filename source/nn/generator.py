@@ -41,7 +41,7 @@ def build_network(config):
         raise ValueError(f"unknown activation '{activation}'")
     if min([n_input, n_output] + hidden) < 1:
         raise ValueError("layer sizes must be positive")
-    init = "he" if activation in ("relu", "leaky_relu") else "xavier"
+    init = config.get("init", "he" if activation in ("relu", "leaky_relu") else "xavier")
     sizes = [n_input] + hidden + [n_output]
     layers = []
     for i in range(len(sizes) - 1):
