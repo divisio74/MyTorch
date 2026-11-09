@@ -120,7 +120,7 @@ one seed and the curves oscillate, so part of E's advantage may be noise.
 
 ## Result of the final training
 
-![training curves](benchmarks/my_torch_network_full_curves.png)
+![training curves](benchmarks/run_full_curves.png)
 
 12 epochs run (17 minutes), best weights from epoch 7.
 
@@ -134,7 +134,7 @@ one seed and the curves oscillate, so part of E's advantage may be noise.
 The previous network (same architecture, batch 128, no regularisation, 150 000
 positions) gets 0.958 on the same 25 000 held-out positions: a gain of 0.45
 point, smaller than the 1.5 points suggested by the 24 000-position comparison.
-It is kept in `bonus/my_torch_network_batch128.nn`.
+It is kept in `bonus/bonus_network_batch128.nn`.
 
 Confusion matrix on the 25 000 held-out positions (rows: truth, columns:
 prediction, order `Nothing`, `Check White`, `Check Black`, `Checkmate White`,

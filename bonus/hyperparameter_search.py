@@ -17,7 +17,7 @@ def main():
     os.makedirs("logs", exist_ok=True)
     with open("logs/hyperparameter_search.json", "w") as file:
         json.dump(summary, file, indent=1)
-    results[0]["network"].save("bonus/my_torch_network_searched.nn")
+    results[0]["network"].save("bonus/bonus_network_searched.nn")
     for item in summary:
         print(item)
 

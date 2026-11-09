@@ -71,7 +71,7 @@ def main():
                                args.patience, args.optimizer, args.lr, args.batch_size, args.l2)
     net.save(args.out)
     os.makedirs("logs", exist_ok=True)
-    name = os.path.splitext(os.path.basename(args.out))[0]
+    name = "run_" + os.path.splitext(os.path.basename(args.out))[0].replace("my_torch_network_", "")
     with open(f"logs/{name}_seed{args.seed}.json", "w") as file:
         json.dump(result, file, indent=1)
     os.makedirs("docs/benchmarks", exist_ok=True)

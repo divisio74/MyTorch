@@ -1,5 +1,10 @@
 # MyTorch chess analyzer
 
+
+my torch networkd 
+
+car find . -type  f -name "my_torch_netxwork* ne doit matcher qu'un model
+
 A small NumPy-based neural-network project with a command-line analyzer for chess
 positions written in FEN notation.
 
@@ -106,7 +111,7 @@ estimates whether the king can run away, but does not simulate blocking or
 capturing the checking piece). Training and validation accuracy are almost
 equal: the network does not overfit. The earlier network (batch 128, no
 regularisation, 150 000 positions) got 95.8 % on the same held-out positions;
-it is kept in `bonus/my_torch_network_batch128.nn`. Curves, confusion matrix and
+it is kept in `bonus/bonus_network_batch128.nn`. Curves, confusion matrix and
 details: [docs/chosen_config.md](docs/chosen_config.md).
 
 ## Design choices
