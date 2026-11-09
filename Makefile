@@ -1,6 +1,6 @@
 PYTHON ?= python3
-SOURCE ?= my_torch_analyser.py
-EXECUTABLE ?= my_torch_analyser
+SOURCE ?= my_torch_analyzer.py
+EXECUTABLE ?= my_torch_analyzer
 
 .PHONY: all install
 
