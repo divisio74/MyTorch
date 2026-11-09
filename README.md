@@ -133,6 +133,14 @@ Each choice, the reason, and the evidence. Measured results come from
 | overfitting | dropout 0.3 + L2 1e-4 + early stopping (patience 5) + large dataset | each alone, dropout 0.1 | on 6 000 positions the plain network reaches train 1.000 / validation 0.843 and L2 improves it (0.863). On the chosen architecture, the combination batch 32 + L2 + dropout 0.3 has the best validation loss (0.172 vs 0.207 for the previous setting). Early stopping restores the best weights. |
 | input features | 971 with attack maps | raw 837 (pieces, turn, castling, en passant) | check is a geometric property that a small network learns poorly from raw squares, so attack and king features are given as inputs. This is feature engineering, the network still learns the labelling. The raw-only encoding was not benchmarked. |
 
+L2 and Adam: the final network applies L2 (1e-4) by adding `l2 * w` to the gradient
+before the Adam step. With Adam this penalty is divided by the adaptive scale
+of each weight, so it is not a uniform weight decay. `AdamW` (decoupled weight
+decay, `source/nn/optimizers.py`, `--optimizer adamw --weight-decay`) is
+implemented and unit-tested, but the final network was not retrained with it,
+so its effect is not measured. With such a small `l2` and no overfitting
+(train 96.5 % / validation 96.3 %), the difference is expected to be small.
+
 ### Random search (bonus)
 
 `bonus/hyperparameter_search.py` samples learning rate, architecture, batch

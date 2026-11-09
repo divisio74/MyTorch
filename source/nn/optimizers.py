@@ -48,3 +48,15 @@ class Adam:
                 m_hat = m / (1 - self.beta1 ** self.t)
                 v_hat = v / (1 - self.beta2 ** self.t)
                 layer.params[key] -= self.lr * m_hat / (np.sqrt(v_hat) + self.eps)
+
+
+class AdamW(Adam):
+    def __init__(self, lr=0.001, weight_decay=0.01, beta1=0.9, beta2=0.999, eps=1e-8):
+        super().__init__(lr, beta1, beta2, eps)
+        self.weight_decay = weight_decay
+
+    def step(self, layers):
+        for layer in layers:
+            if "w" in layer.params:
+                layer.params["w"] *= 1 - self.lr * self.weight_decay
+        super().step(layers)

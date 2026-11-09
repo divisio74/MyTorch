@@ -13,10 +13,10 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from source.analyzer.encoding import CLASSES, N_FEATURES
 from source.nn.generator import build_network
 from source.nn.losses import CrossEntropy
-from source.nn.optimizers import SGD, Momentum, Adam
+from source.nn.optimizers import SGD, Momentum, Adam, AdamW
 from source.nn.data import one_hot, accuracy, confusion_matrix
 
-OPTIMIZERS = {"sgd": SGD, "momentum": Momentum, "adam": Adam}
+OPTIMIZERS = {"sgd": SGD, "momentum": Momentum, "adam": Adam, "adamw": AdamW}
 
 
 def load_dataset(path, limit=None):
@@ -31,15 +31,16 @@ def load_dataset(path, limit=None):
             X[b:], one_hot(y[b:], len(CLASSES)))
 
 
-def run_training(config, data, seed=0, epochs=30, patience=5, optimizer="adam", lr=0.001, batch_size=128, l2=0.0):
+def run_training(config, data, seed=0, epochs=30, patience=5, optimizer="adam", lr=0.001, batch_size=128, l2=0.0, weight_decay=0.01):
     X, y, X_val, y_val, X_test, y_test = data
     np.random.seed(seed)
     net = build_network(dict(config, input=N_FEATURES, output=len(CLASSES)))
     start = time.time()
-    history = net.fit(X, y, epochs, CrossEntropy(), OPTIMIZERS[optimizer](lr), batch_size=batch_size,
+    opt = AdamW(lr, weight_decay) if optimizer == "adamw" else OPTIMIZERS[optimizer](lr)
+    history = net.fit(X, y, epochs, CrossEntropy(), opt, batch_size=batch_size,
                       X_val=X_val, y_val=y_val, patience=patience, l2=l2)
     result = {
-        "config": config, "seed": seed, "optimizer": optimizer, "lr": lr, "batch_size": batch_size, "l2": l2,
+        "config": config, "seed": seed, "optimizer": optimizer, "lr": lr, "batch_size": batch_size, "l2": l2, "weight_decay": weight_decay if optimizer == "adamw" else 0.0,
         "epochs_run": len(history["train"]), "seconds": round(time.time() - start, 1),
         "train_loss": history["train"], "val_loss": history["val"],
         "train_accuracy": accuracy(net.predict(X[:20000]), y[:20000]),
@@ -63,12 +64,13 @@ def main():
     parser.add_argument("--epochs", type=int, default=30)
     parser.add_argument("--patience", type=int, default=5)
     parser.add_argument("--l2", type=float, default=0.0)
+    parser.add_argument("--weight-decay", type=float, default=0.01)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--limit", type=int, default=None)
     args = parser.parse_args()
     config = {"hidden": args.hidden, "activation": args.activation, "dropout": args.dropout}
     net, result = run_training(config, load_dataset(args.data, args.limit), args.seed, args.epochs,
-                               args.patience, args.optimizer, args.lr, args.batch_size, args.l2)
+                               args.patience, args.optimizer, args.lr, args.batch_size, args.l2, args.weight_decay)
     net.save(args.out)
     os.makedirs("logs", exist_ok=True)
     name = "run_" + os.path.splitext(os.path.basename(args.out))[0].replace("my_torch_network_", "")
