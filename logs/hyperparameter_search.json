@@ -1,0 +1,144 @@
+[
+ {
+  "params": {
+   "lr": 0.0013915971093684705,
+   "hidden": [
+    32
+   ],
+   "batch_size": 32,
+   "activation": "relu",
+   "dropout": 0.3,
+   "l2": 0.0001
+  },
+  "val_loss": 0.16658671909363812,
+  "val_accuracy": 0.9375
+ },
+ {
+  "params": {
+   "lr": 0.004817508474772369,
+   "hidden": [
+    32
+   ],
+   "batch_size": 64,
+   "activation": "leaky_relu",
+   "dropout": 0.1,
+   "l2": 0.0001
+  },
+  "val_loss": 0.17685879964157625,
+  "val_accuracy": 0.9341666666666667
+ },
+ {
+  "params": {
+   "lr": 0.002201796786541388,
+   "hidden": [
+    32
+   ],
+   "batch_size": 32,
+   "activation": "leaky_relu",
+   "dropout": 0.1,
+   "l2": 0.001
+  },
+  "val_loss": 0.18360919241446608,
+  "val_accuracy": 0.9291666666666667
+ },
+ {
+  "params": {
+   "lr": 0.004632042626636102,
+   "hidden": [
+    32
+   ],
+   "batch_size": 64,
+   "activation": "leaky_relu",
+   "dropout": 0.1,
+   "l2": 0.0
+  },
+  "val_loss": 0.1985207919838832,
+  "val_accuracy": 0.9233333333333333
+ },
+ {
+  "params": {
+   "lr": 0.0018699628222328475,
+   "hidden": [
+    128,
+    64
+   ],
+   "batch_size": 256,
+   "activation": "tanh",
+   "dropout": 0.3,
+   "l2": 0.0
+  },
+  "val_loss": 0.21237665431086575,
+  "val_accuracy": 0.9179166666666667
+ },
+ {
+  "params": {
+   "lr": 0.0010582985358032332,
+   "hidden": [
+    32
+   ],
+   "batch_size": 64,
+   "activation": "leaky_relu",
+   "dropout": 0.1,
+   "l2": 0.0001
+  },
+  "val_loss": 0.21371751942818912,
+  "val_accuracy": 0.9145833333333333
+ },
+ {
+  "params": {
+   "lr": 0.0009793427128718562,
+   "hidden": [
+    128,
+    64
+   ],
+   "batch_size": 256,
+   "activation": "relu",
+   "dropout": 0.1,
+   "l2": 0.001
+  },
+  "val_loss": 0.21631329321906942,
+  "val_accuracy": 0.9083333333333333
+ },
+ {
+  "params": {
+   "lr": 0.0020554062603827007,
+   "hidden": [
+    32
+   ],
+   "batch_size": 256,
+   "activation": "leaky_relu",
+   "dropout": 0.1,
+   "l2": 0.001
+  },
+  "val_loss": 0.25937009271810346,
+  "val_accuracy": 0.8966666666666666
+ },
+ {
+  "params": {
+   "lr": 0.0004907479285243859,
+   "hidden": [
+    32
+   ],
+   "batch_size": 128,
+   "activation": "relu",
+   "dropout": 0.1,
+   "l2": 0.0001
+  },
+  "val_loss": 0.3435106034451825,
+  "val_accuracy": 0.8654166666666666
+ },
+ {
+  "params": {
+   "lr": 0.0006541687164255679,
+   "hidden": [
+    64
+   ],
+   "batch_size": 256,
+   "activation": "relu",
+   "dropout": 0.1,
+   "l2": 0.001
+  },
+  "val_loss": 0.350872449553878,
+  "val_accuracy": 0.85875
+ }
+]

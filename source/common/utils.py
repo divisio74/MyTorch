@@ -45,7 +45,7 @@ def save_as_csv(loss_history : list[float], output_dir : str | Path = "outputs")
 
 def save_as_img(loss_history : list[float], output_dir : str | Path = "outputs") -> Path:
     losses = validated_losses(loss_history)
-    
+
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
 

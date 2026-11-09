@@ -12,7 +12,7 @@ class Network:
         self.layers = layers
 
     def forward(self, x):
-        a = x
+        a = np.asarray(x, dtype=np.float64)
         for layer in self.layers:
             a = layer.forward(a)
         return a

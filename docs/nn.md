@@ -26,19 +26,14 @@ whose gradients are being calculated.
 
 ## Activation choices
 
-The analyzer's hidden activation is `tanh`: it is smooth, differentiable, and
-keeps hidden values centered and bounded between -1 and 1. This suits its
-signed piece-placement inputs, but can have small gradients for large
-magnitudes. The analyzer currently has no output activation; it compares the
-raw output scores to select a label.
-
-The reusable `source/nn` package also provides ReLU and sigmoid. ReLU is a
-simple hidden-layer choice that does not saturate on positive inputs, though
-units can stop producing gradients when their input stays negative. Sigmoid is
-bounded between 0 and 1 and can be useful for probability-like outputs, but
-can saturate and yield small gradients at either extreme. These are
-implementation tradeoffs, not benchmark conclusions: the repository does not
-currently include a comparison of activation functions.
+The pre-trained network uses ReLU in the hidden layers and a softmax output
+with the cross-entropy loss. ReLU is cheap, does not saturate on positive
+inputs, and works well with He initialisation, though a unit can stop
+producing gradients when its input stays negative (leaky ReLU avoids this).
+Sigmoid and tanh are bounded and saturate at both ends, which gives small
+gradients in deep networks. The measured comparison of ReLU, leaky ReLU, tanh
+and sigmoid is in `docs/benchmarks.md`, and the full list of choices is in the
+README.
 
 ## Add a layer or activation
 
@@ -65,20 +60,13 @@ dictionaries. `SGD.step` updates each parameter using the gradient with the
 same key. Add tests for output shape and numerical-gradient agreement; the
 finite-difference checks in `tests/test_gradient.py` are an example.
 
-## Current limitations
+## Current state
 
-The analyzer CLI does **not** currently build or use `Network`, `Dense`, `MSE`,
-or `SGD`. Its training and prediction routines are implemented separately in
-`source/analyzer/train.py` and `source/analyzer/predict.py` using two arrays of
-weights and a `tanh` hidden activation. Changes to `source/nn` therefore do not
-change analyzer behavior unless the analyzer is explicitly integrated with
-these components.
+The analyzer uses this package: `source/analyzer/pipeline.py` loads a network
+with `Network.load`, encodes the positions (`source/analyzer/encoding.py`),
+predicts with `predict_classes` in prediction mode, and trains with `fit` in
+training mode. Networks are saved and loaded as JSON (`Network.save`,
+`Network.load`) and can be generated with `my_torch_generator`.
 
-Also, `Dense` accepts `init_norm="he"` or `"xavier"`, but although it computes
-the corresponding scale, the current weight assignment uses the separate
-`WDC` constant. Do not assume the selected initialization mode currently
-changes the initialized weight scale.
-
-`CrossEntropy` exists in `source/nn/losses.py`, but its `forward` and
-`backward` methods are unfinished. Use `MSE` for the currently implemented
-network training flow.
+`Dense` accepts `init_norm="he"` or `"xavier"` and scales the initial weights
+accordingly.
