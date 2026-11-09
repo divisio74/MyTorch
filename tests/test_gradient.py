@@ -1,7 +1,7 @@
 import numpy as np
 from source.nn.layers import Dense
-from source.nn.activations import ReLU, Sigmoid
-from source.nn.losses import MSE
+from source.nn.activations import ReLU, LeakyReLU, Sigmoid, Tanh, Softmax
+from source.nn.losses import MSE, CrossEntropy
 
 EPS = 1e-5
 
@@ -35,7 +35,7 @@ def test_dense():
 
 
 def test_activations():
-    for cls in (ReLU, Sigmoid):
+    for cls in (ReLU, LeakyReLU, Sigmoid, Tanh, Softmax):
         layer = cls()
         x = np.random.randn(5, 3)
         out = layer.forward(x)
@@ -51,8 +51,19 @@ def test_mse():
     assert np.allclose(loss.backward(), numerical_grad(lambda: MSE().forward(pred, target), pred))
 
 
+def test_cross_entropy():
+    loss = CrossEntropy()
+    s = Softmax()
+    x = np.random.randn(5, 3)
+    target = np.eye(3)[np.random.randint(0, 3, 5)]
+    loss.forward(s.forward(x), target)
+    grad_x = s.backward(loss.backward())
+    assert np.allclose(grad_x, numerical_grad(lambda: CrossEntropy().forward(Softmax().forward(x), target), x))
+
+
 if __name__ == "__main__":
     test_dense()
     test_activations()
     test_mse()
+    test_cross_entropy()
     print("OK")
