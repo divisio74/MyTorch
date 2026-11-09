@@ -118,6 +118,13 @@ at the last epoch, while the others oscillate. It is also the setting of the
 best random-search run (dropout 0.3, L2 1e-4, batch 32). This comparison uses
 one seed and the curves oscillate, so part of E's advantage may be noise.
 
+Note on L2 and Adam: L2 is added to the gradient before the Adam step, so Adam
+divides it by the adaptive scale of each weight and the decay is not uniform.
+`AdamW` (decoupled weight decay) is implemented in `source/nn/optimizers.py` and
+tested (`tests/test_network.py`), available with `--optimizer adamw
+--weight-decay`, but the final network was not retrained with it: its effect
+is not measured.
+
 ## Result of the final training
 
 ![training curves](benchmarks/run_full_curves.png)

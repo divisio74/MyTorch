@@ -7,7 +7,7 @@ from source.nn.network import Network
 from source.nn.layers import Dense, Dropout
 from source.nn.activations import ReLU, Softmax, Tanh
 from source.nn.losses import CrossEntropy
-from source.nn.optimizers import Adam, Momentum
+from source.nn.optimizers import Adam, AdamW, Momentum
 from source.nn.generator import build_network
 from source.nn.data import one_hot, split, accuracy
 from source.nn.search import random_search
@@ -36,6 +36,27 @@ def test_momentum():
     net = Network([Dense(4, 16), ReLU(), Dense(16, 3, "xavier"), Softmax()])
     history = net.fit(X, y, 50, CrossEntropy(), Momentum(0.05), batch_size=64)
     assert history["train"][-1] < history["train"][0]
+
+
+def test_adamw_decay_is_decoupled():
+    adam_layer = Dense(4, 3)
+    adamw_layer = Dense(4, 3)
+    adamw_layer.params["w"] = adam_layer.params["w"].copy()
+    before = adam_layer.params["w"].copy()
+    Adam(0.01).step([adam_layer])
+    AdamW(0.01, 0.5).step([adamw_layer])
+    assert np.allclose(adam_layer.params["w"], before)
+    assert np.allclose(adamw_layer.params["w"], before * (1 - 0.01 * 0.5))
+    assert not adamw_layer.params["b"].any()
+
+
+def test_adamw_training():
+    np.random.seed(0)
+    X, y = toy_data()
+    net = Network([Dense(4, 16), ReLU(), Dense(16, 3, "xavier"), Softmax()])
+    history = net.fit(X, y, 50, CrossEntropy(), AdamW(0.01, 0.01), batch_size=32)
+    assert history["train"][-1] < history["train"][0]
+    assert accuracy(net.predict(X), y) > 0.85
 
 
 def test_save_load():
@@ -111,6 +132,8 @@ def test_random_search():
 if __name__ == "__main__":
     test_training_classification()
     test_momentum()
+    test_adamw_decay_is_decoupled()
+    test_adamw_training()
     test_save_load()
     test_load_errors()
     test_dropout_modes()
